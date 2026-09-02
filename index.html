@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Speed Sort</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background: #f1f5f9;
+  margin: 0;
+  padding: 20px;
+}
+
+h1 {
+  font-size: 42px;
+}
+
+.box {
+  background: white;
+  max-width: 650px;
+  margin: 20px auto;
+  padding: 25px;
+  border-radius: 20px;
+}
+
+button {
+  padding: 14px 25px;
+  font-size: 18px;
+  border: none;
+  border-radius: 12px;
+  background: #111827;
+  color: white;
+  margin: 8px;
+}
+
+input {
+  padding: 12px;
+  font-size: 18px;
+  border-radius: 10px;
+  border: 1px solid #aaa;
+}
+
+.cards {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 25px;
+}
+
+.card {
+  background: white;
+  border: 3px solid #aaa;
+  border-radius: 15px;
+  padding: 20px;
+  font-size: 22px;
+  cursor: grab;
+  user-select: none;
+}
+
+#game {
+  display: none;
+}
+
+#lobby {
+  display: none;
+}
+</style>
+</head>
+
+<body>
+
+<h1>⚡ SPEED SORT</h1>
+
+<div class="box" id="start">
+
+<h2>Willkommen!</h2>
+
+<button onclick="createGame()">
+Spiel erstellen
+</button>
+
+<br>
+
+<input id="codeInput" placeholder="Spielcode">
+
+<button onclick="joinGame()">
+Beitreten
+</button>
+
+</div>
+
+
+<div class="box" id="lobby">
+
+<h2>🏠 Lobby</h2>
+
+<p>Spielcode:</p>
+
+<h1 id="gameCode"></h1>
+
+<p>Spieler: <span id="players">1</span>/30</p>
+
+<button onclick="startGame()">
+Spiel starten
+</button>
+
+</div>
+
+
+<div class="box" id="game">
+
+<h2>Runde 1</h2>
+
+<h2>
+⏱️ <span id="timer">15</span>
+Sekunden
+</h2>
+
+<p>
+Ordne die Karten von klein nach groß:
+</p>
+
+<div class="cards" id="cards"></div>
+
+<button onclick="checkAnswer()">
+Fertig!
+</button>
+
+<h2 id="result"></h2>
+
+<h2 id="points"></h2>
+
+</div>
+
+
+<script>
+
+let gameCode = "";
+let cards = [
+"Maus",
+"Hund",
+"Elefant"
+];
+
+let correct = [
+"Maus",
+"Hund",
+"Elefant"
+];
+
+let time = 15;
+let timer;
+
+
+function createGame() {
+
+gameCode =
+Math.floor(100000 + Math.random() * 900000);
+
+document.getElementById("start").style.display = "none";
+
+document.getElementById("lobby").style.display = "block";
+
+document.getElementById("gameCode").innerText =
+gameCode;
+
+}
+
+
+function joinGame() {
+
+let code =
+document.getElementById("codeInput").value;
+
+if(code.length < 1) {
+
+alert("Bitte Spielcode eingeben!");
+
+return;
+
+}
+
+document.getElementById("start").style.display =
+"none";
+
+document.getElementById("lobby").style.display =
+"block";
+
+document.getElementById("gameCode").innerText =
+code;
+
+}
+
+
+function startGame() {
+
+document.getElementById("lobby").style.display =
+"none";
+
+document.getElementById("game").style.display =
+"block";
+
+cards.sort(() => Math.random() - 0.5);
+
+showCards();
+
+startTimer();
+
+}
+
+
+function showCards() {
+
+let container =
+document.getElementById("cards");
+
+container.innerHTML = "";
+
+cards.forEach((card, index) => {
+
+let element =
+document.createElement("div");
+
+element.className = "card";
+
+element.innerText = card;
+
+element.draggable = true;
+
+element.ondragstart = function(event) {
+
+event.dataTransfer.setData(
+"text/plain",
+index
+);
+
+};
+
+element.ondragover = function(event) {
+
+event.preventDefault();
+
+};
+
+element.ondrop = function(event) {
+
+let oldIndex =
+event.dataTransfer.getData("text/plain");
+
+let newIndex = index;
+
+let temp =
+cards[oldIndex];
+
+cards[oldIndex] =
+cards[newIndex];
+
+cards[newIndex] =
+temp;
+
+showCards();
+
+};
+
+container.appendChild(element);
+
+});
+
+}
+
+
+function startTimer() {
+
+time = 15;
+
+document.getElementById("timer").innerText =
+time;
+
+timer = setInterval(function() {
+
+time--;
+
+document.getElementById("timer").innerText =
+time;
+
+if(time <= 0) {
+
+clearInterval(timer);
+
+checkAnswer();
+
+}
+
+}, 1000);
+
+}
+
+
+function checkAnswer() {
+
+clearInterval(timer);
+
+let correctAnswer =
+cards.join("|") === correct.join("|");
+
+if(correctAnswer) {
+
+let points =
+Math.max(10, time * 10);
+
+document.getElementById("result").innerText =
+"🎉 Richtig!";
+
+document.getElementById("points").innerText =
+"+" + points + " Punkte";
+
+} else {
+
+document.getElementById("result").innerText =
+"❌ Falsch!";
+
+document.getElementById("points").innerText =
+"0 Punkte";
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
